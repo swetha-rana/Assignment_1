@@ -1,3 +1,8 @@
+!pip install wandb #install wandb
+
+import wandb
+wandb.init(project="Assignment-1", entity="swe-rana")
+
 from keras.datasets import fashion_mnist
 import matplotlib.pyplot as plt
 import random
@@ -40,8 +45,9 @@ columns =5
 fig = plt.figure(figsize=(10, 7))
 for i,j in zip(range(1, columns*rows +1),range(0,10)):
         num = random.choice(Class_names[j])
+        #wandb.log({"images": [wandb.Image(X_train[num],caption=data[j])]})
         fig.add_subplot(rows, columns, i)
         plt.imshow(X_train[num],cmap ="gray")
         plt.axis('off')
         plt.title(data[j])
-    
+wandb.log({"chart": plt})
