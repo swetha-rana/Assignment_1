@@ -240,4 +240,37 @@ def stochastic_gradient(X, Y, layers_dims, learning_rate,num_epochs,lamda):
             #print("iteration" + str(i) + "done")
             #print(start,end)
           return params
-parameters =stochastic_gradient(train_x, Y, layers_dims, learning_rate=0.01,num_epochs=10,lamda=0.5)
+
+def momentum(X,Y,layers_dims,learning_rate,beta,num_epochs):
+    parameters = initialize_parameters(layers_dims)
+    previous_updates =prev_updates(layers_dims)
+    L = len(parameters) // 2 # number of layers in the neural network
+    for j in range(0,num_epochs):
+        for i in range(0,iterations_bat):
+            start = i*batch_size
+            end = start+batch_size
+            AL, caches = L_model_forward(X[:,start:end], parameters)
+            grads = L_model_backward(Y[:,start:end],AL, caches)
+                                   
+            for l in range(1, L + 1):
+                previous_updates["W"+str(l)] = (beta*previous_updates["W"+str(l)]) + ((1-beta)*grads["dW" + str(l)])
+                parameters["W" + str(l)] = parameters["W" + str(l)] - (learning_rate*previous_updates["W"+str(l)])
+                
+                previous_updates["b"+str(l)] = (beta*previous_updates["b"+str(l)]) + ((1-beta)*grads["db" + str(l)])
+                parameters["b" + str(l)] = parameters["b" + str(l)] - (learning_rate*previous_updates["b"+str(l)])
+            
+            
+        z_pred_1, caches = L_model_forward(train_x, parameters)
+        z_pred = np.argmax(z_pred_1,axis = 0)
+        zyy = train_y.flatten()
+        z_acc = accuracy_score(zyy,z_pred)
+        print("accuracy",z_acc)             
+#        print("iteration" + str(j) + "done")  
+    return parameters, previous_updates
+
+gd_optimizer = "momentum"
+if(gd_optimizer == "stochastic_gradient"):
+    parameters =stochastic_gradient(train_x, Y, layers_dims, learning_rate=0.01,num_epochs=10,lamda=0.5)
+if(gd_optimizer == "momentum"):
+    parameters, previous_updates=momentum(train_x,Y,layers_dims,learning_rate=0.01,beta=0.9,num_epochs=10)
+
