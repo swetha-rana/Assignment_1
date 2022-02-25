@@ -273,17 +273,12 @@ def rmsprop(X,Y,layers_dims,learning_rate,beta,num_epochs):
     previous_updates =prev_updates(layers_dims)
     for j in range(0,num_epochs):
         for i in range(0,iterations_bat):
-           print(i) 
+           
            start = i*batch_size
            end = start+batch_size
            AL, caches = L_model_forward(X[:,start:end], parameters)
-           #print(AL.shape)
 
-           #global cz
-           #cz = caches
            grads = L_model_backward(AL, Y[:,start:end], caches)
-
-           parameters,  previous_updates = update_parameters_RMSprop(parameters,grads,learning_rate,beta,previous_updates)
 
            delta = 1e-6 
             
@@ -307,7 +302,7 @@ def rmsprop(X,Y,layers_dims,learning_rate,beta,num_epochs):
     return parameters, previous_updates
 
 def adam(X,Y,layers_dims,v,m,t,learning_rate,beta,num_epochs):
-    parameters = initialize_parameters_deep(layers_dims)
+    parameters = initialize_parameters(layers_dims)
     for j in range(0,num_epochs):
             for i in range(0,iterations_bat):
                 start = i*batch_size
@@ -350,7 +345,7 @@ def adam(X,Y,layers_dims,v,m,t,learning_rate,beta,num_epochs):
     return parameters,v,m,t
 
 def Nadam(X,Y,layers_dims,m,v,t,learning_rate,beta,num_epochs):
-    parameters = initialize_parameters_deep(layers_dims)
+    parameters = initialize_parameters(layers_dims)
     L = len(parameters )//2
     for j in range(0,num_epochs):
         for l in range(1, L+1):
@@ -396,11 +391,10 @@ def Nadam(X,Y,layers_dims,m,v,t,learning_rate,beta,num_epochs):
         print("accuracy",z_acc)  
 
     return parameters
-parameters=nadam(train_x,Y,layers_dims,previous_updates,previous_updates,t,learning_rate=0.01,beta=0.9,num_epochs=10)
 
 def nesterov(X,Y,learning_rate,beta,previous_updates,num_epochs):
         
-    parameters=initialize_parameters_deep(layers_dims)
+    parameters=initialize_parameters(layers_dims)
     L = len(parameters)//2
     for j in range(0,num_epochs):
         for l in range(1, L+1):
@@ -428,26 +422,23 @@ def nesterov(X,Y,learning_rate,beta,previous_updates,num_epochs):
         print("accuracy_nestrov",z_acc) 
     return params            
 
-
+t = 1
 learning_rate = 0.01
 beta = 0.9
 num_epochs=10
-parameters=nesterov(train_x,Y,learning_rate,beta,previous_updates,num_epochs)
+lamda = 0.0005
 
-
-
-gd_optimizer = "momentum"
+gd_optimizer = "stochastic_gradient"
 if(gd_optimizer == "stochastic_gradient"):
-    parameters =stochastic_gradient(train_x, Y, layers_dims, learning_rate=0.01,num_epochs=10,lamda=0.5)
+    parameters =stochastic_gradient(train_x, Y, layers_dims, learning_rate,num_epochs,lamda)
 if(gd_optimizer == "momentum"):
-    parameters, previous_updates=momentum(train_x,Y,layers_dims,learning_rate=0.01,beta=0.9,num_epochs=10)
+    parameters, previous_updates=momentum(train_x,Y,layers_dims,learning_rate,beta,num_epochs)
 if(gd_optimizer == "rmsprop"):
-    parameters, previous_updates=rmsprop(train_x,Y,layers_dims,learning_rate=0.01,beta=0.9,num_epochs=10)
+    parameters, previous_updates=rmsprop(train_x,Y,layers_dims,learning_rate,beta,num_epochs)
 if(gd_optimizer == "Adam"):
     t=1
-    parameters,v,m,t=adam(train_x,Y,layers_dims,previous_updates,previous_updates,t,learning_rate=0.01,beta=0.9,num_epochs=10)
-if(gd_optimizer == "nadam"): 
-    parameters=nadam(train_x,Y,layers_dims,previous_updates,previous_updates,t,learning_rate=0.01,beta=0.9,num_epochs=10)
+    parameters,v,m,t=adam(train_x,Y,layers_dims,previous_updates,previous_updates,t,learning_rate,beta,num_epochs)
+if(gd_optimizer == "Nadam"): 
+    parameters=Nadam(train_x,Y,layers_dims,previous_updates,previous_updates,t,learning_rate,beta,num_epochs)
 if(gd_optimizer == "nesterov"):
     parameters=nesterov(train_x,Y,learning_rate,beta,previous_updates,num_epochs)
-
