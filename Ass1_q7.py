@@ -13,11 +13,10 @@ train_y = train_y.reshape(1, len(train_y))
 test_y = test_y.reshape(1, len(test_y))
 train_x_flatten = train_x_orig.reshape(train_x_orig.shape[0], -1).T   # The "-1" makes reshape flatten the remaining dimensions
 test_x_flatten = test_x_orig.reshape(test_x_orig.shape[0], -1).T
-no_of_class=10
+no_of_class=len(np.unique(train_y))
 
 train_x = train_x_flatten/255.
 test_x = test_x_flatten/255.
-layers_dims = [len(train_x),256,128,no_of_class]
 onehot_encoded = list()
 
 for i in range(train_y.shape[1]):
@@ -27,8 +26,8 @@ for i in range(train_y.shape[1]):
     onehot_encoded.append(letter)
 
 N=np.array(onehot_encoded)
-Y=N.reshape(10,60000)
-for i in range(0,60000):
+Y=N.reshape(no_of_class,train_x.shape[1])
+for i in range(0,train_x.shape[1]):
       Y[:,i] = N[i]
 layers_dims = [len(train_x),256,128,no_of_class]
 
@@ -86,17 +85,6 @@ def relu(Z):
     
     cache = Z 
     return A, cache
-
-def Relu_derivative(Z):
-    return 1*(Z>0) 
-
-def tanh(Z):
-    return np.tanh(Z)
-
-def tanh_backward(Z):
-    t = np.tanh(Z)
-    dt = 1 - (t**2)
-    return dZ
 
 def sigmoid_backward(dA, cache):
    
