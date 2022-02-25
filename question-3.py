@@ -220,7 +220,7 @@ def update_parameters(parameters, grads, learning_rate,lamda):
         
     return parameters
     
-    
+#stochastic gradient    
 batch_size = 100
 iterations_bat = int(train_x.shape[1]/batch_size)   
 def stochastic_gradient(X, Y, layers_dims, learning_rate,num_epochs,lamda):
@@ -240,7 +240,7 @@ def stochastic_gradient(X, Y, layers_dims, learning_rate,num_epochs,lamda):
             #print("iteration" + str(i) + "done")
             #print(start,end)
           return params
-
+#momentum gradient descent optimizer
 def momentum(X,Y,layers_dims,learning_rate,beta,num_epochs):
     parameters = initialize_parameters(layers_dims)
     previous_updates =prev_updates(layers_dims)
@@ -267,10 +267,51 @@ def momentum(X,Y,layers_dims,learning_rate,beta,num_epochs):
         print("accuracy",z_acc)             
 #        print("iteration" + str(j) + "done")  
     return parameters, previous_updates
+# rmsprop optimizer
+def rmsprop(X,Y,layers_dims,learning_rate,beta,num_epochs):
+    parameters = initialize_parameters(layers_dims)
+    previous_updates =prev_updates(layers_dims)
+    for j in range(0,num_epochs):
+        for i in range(0,iterations_bat):
+           print(i) 
+           start = i*batch_size
+           end = start+batch_size
+           AL, caches = L_model_forward(X[:,start:end], parameters)
+           #print(AL.shape)
+
+           #global cz
+           #cz = caches
+           grads = L_model_backward(AL, Y[:,start:end], caches)
+
+           parameters,  previous_updates = update_parameters_RMSprop(parameters,grads,learning_rate,beta,previous_updates)
+
+           delta = 1e-6 
+            
+           L = len(parameters) // 2 
+        
+           for l in range(1, L + 1):
+                vdw = beta*previous_updates["W" + str(l)] + (1-beta)*np.multiply(grads["dW" + str(l)],grads["dW" + str(l)])
+                vdb = beta*previous_updates["b" + str(l)] + (1-beta)*np.multiply(grads["db" + str(l)],grads["db" + str(l)])
+        
+                parameters["W" + str(l)] = parameters["W" + str(l)] - learning_rate * grads["dW" + str(l)] / (np.sqrt(vdw)+delta)
+                parameters["b" + str(l)] = parameters["b" + str(l)] - learning_rate * grads["db" + str(l)] / (np.sqrt(vdb)+delta)
+        
+                previous_updates["W" + str(l)] = vdw
+                previous_updates["b" + str(l)] = vdb
+             
+        z_pred_1, caches = L_model_forward(train_x, parameters)
+        z_pred = np.argmax(z_pred_1,axis = 0)
+        zyy = train_y.flatten()
+        z_acc = accuracy_score(zyy,z_pred)
+        print("accuracy",z_acc)              
+    return parameters, previous_updates
+
+
 
 gd_optimizer = "momentum"
 if(gd_optimizer == "stochastic_gradient"):
     parameters =stochastic_gradient(train_x, Y, layers_dims, learning_rate=0.01,num_epochs=10,lamda=0.5)
 if(gd_optimizer == "momentum"):
     parameters, previous_updates=momentum(train_x,Y,layers_dims,learning_rate=0.01,beta=0.9,num_epochs=10)
-
+if(gd_optimizer == "rmsprop"):
+    parameters, previous_updates=RMSprop(train_x,Y,layers_dims,learning_rate=0.01,beta=0.9,num_epochs=10)
