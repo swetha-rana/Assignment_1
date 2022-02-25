@@ -19,7 +19,7 @@ train_y = train_y.reshape(1, len(train_y))
 test_y = test_y.reshape(1, len(test_y))
 train_x_flatten = train_x_orig.reshape(train_x_orig.shape[0], -1).T   
 test_x_flatten = test_x_orig.reshape(test_x_orig.shape[0], -1).T
-no_of_class=10
+no_of_class=len(np.unique(train_y))
 
 train_x = train_x_flatten/255
 test_x = test_x_flatten/255
@@ -33,7 +33,8 @@ for i in range(train_y.shape[1]):
     onehot_encoded.append(letter)
 
 Y=np.array(onehot_encoded)
-layers_dims = [len(train_x),256,128,no_of_class]
+num_features = train_x.shape[0]
+layers_dims = [num_features,256,128,no_of_class]
 
 # Function: initialize_parameters_ 
 # used for initialising the parameters of feed forward network
@@ -126,23 +127,15 @@ def L_layer_model(X, Y, layers_dims):
     return parameters,caches,AL
 
 parameters,caches,AL = L_layer_model(train_x, Y, layers_dims)
-Z=AL.reshape(60000,10)
-A3=caches[2][1].reshape(m_train,no_of_class)
-A2=caches[1][1].reshape(m_train,layers_dims[2])
-A1=caches[0][1].reshape(m_train,layers_dims[1])
-
-
-
-# function: softmax
-# perform softmax activation function to calculate the relative probabilities
 def softmax(n):
-    e = exp(n)
-    return e / e.sum()
+ 	e = exp(n)
+ 	return e / e.sum()
+ 	
 
-import numpy as np
-probability=np.empty(shape=(no_of_class,m_train))
 
-for i in range(0,m_train):
-        n=Z[i]
-        probability[:,i]=softmax(n)
-    
+sm=[]
+for i in range(AL.shape[1]):
+    n=AL[:,i]
+    u=softmax(n)
+    sm.append(u)
+probability=np.array(sm) 
