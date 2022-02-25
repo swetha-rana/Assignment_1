@@ -356,7 +356,7 @@ if(gd_optimizer == "stochastic_gradient"):
 if(gd_optimizer == "momentum"):
     parameters, previous_updates=momentum(train_x,Y,layers_dims,learning_rate=0.01,beta=0.9,num_epochs=10)
 if(gd_optimizer == "rmsprop"):
-    parameters, previous_updates=RMSprop(train_x,Y,layers_dims,learning_rate=0.01,beta=0.9,num_epochs=10)
+    parameters, previous_updates=rmsprop(train_x,Y,layers_dims,learning_rate=0.01,beta=0.9,num_epochs=10)
 if(gd_optimizer == "Adam"):
     t=1
     v=previous_updates
