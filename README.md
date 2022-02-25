@@ -16,3 +16,7 @@ question_3.py : Implement the backpropagation algorithm with support for the fol
                   - nadam
                   
 By setting the batch_size variable we can change the batch size. 
+
+Question4.ipynb program has algorithm to do wandb sweeps. 
+
+
