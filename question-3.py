@@ -388,11 +388,7 @@ def Nadam(X,Y,layers_dims,m,v,t,learning_rate,beta,num_epochs):
                 m["db"+str(l)] = mdb
         
             t = t + 1 # timestep            
-            
-            
-            #params,v,m,t = update_parameters_adam(parameters, grads, learning_rate,v,m,t)  
-        #print("iteration" + str(j) + "done")
-        
+
         z_pred_1, caches = L_model_forward(train_x, parameters)
         z_pred = np.argmax(z_pred_1,axis = 0)
         zyy = train_y.flatten()
@@ -401,6 +397,43 @@ def Nadam(X,Y,layers_dims,m,v,t,learning_rate,beta,num_epochs):
 
     return parameters
 parameters=nadam(train_x,Y,layers_dims,previous_updates,previous_updates,t,learning_rate=0.01,beta=0.9,num_epochs=10)
+
+def nesterov(X,Y,learning_rate,beta,previous_updates,num_epochs):
+        
+    parameters=initialize_parameters_deep(layers_dims)
+    L = len(parameters)//2
+    for j in range(0,num_epochs):
+        for l in range(1, L+1):
+            parameters["W"+str(l)] = parameters["W"+str(l)] - beta*previous_updates["W"+str(l)]
+            parameters["b"+str(l)] = parameters["b"+str(l)] - beta*previous_updates["b"+str(l)]
+        for i in range(0,iterations_bat):
+            start = i*batch_size
+            end = start+batch_size    
+            AL, caches = L_model_forward(X[:,start:end], parameters)
+            grads = L_model_backward( Y[:,start:end],AL,caches)
+            
+            L = len(parameters) // 2 # number of layers in the neural network
+           
+            for l in range(1, L + 1):
+                previous_updates["W"+str(l)] = beta*previous_updates["W"+str(l)] + (1-beta)*grads["dW" + str(l)]
+                parameters["W" + str(l)] = parameters["W" + str(l)] - learning_rate*previous_updates["W"+str(l)]
+                
+                previous_updates["b"+str(l)] = beta*previous_updates["b"+str(l)] + (1-beta)*grads["db" + str(l)]
+                parameters["b" + str(l)] = parameters["b" + str(l)] - learning_rate*previous_updates["b"+str(l)]
+             
+        z_pred_1, caches = L_model_forward(train_x, parameters)
+        z_pred = np.argmax(z_pred_1,axis = 0)
+        zyy = train_y.flatten()
+        z_acc = accuracy_score(zyy,z_pred)
+        print("accuracy_nestrov",z_acc) 
+    return params            
+
+
+learning_rate = 0.01
+beta = 0.9
+num_epochs=10
+parameters=nesterov(train_x,Y,learning_rate,beta,previous_updates,num_epochs)
+
 
 
 gd_optimizer = "momentum"
@@ -412,8 +445,9 @@ if(gd_optimizer == "rmsprop"):
     parameters, previous_updates=rmsprop(train_x,Y,layers_dims,learning_rate=0.01,beta=0.9,num_epochs=10)
 if(gd_optimizer == "Adam"):
     t=1
-    v=previous_updates
-    m=previous_updates
     parameters,v,m,t=adam(train_x,Y,layers_dims,previous_updates,previous_updates,t,learning_rate=0.01,beta=0.9,num_epochs=10)
 if(gd_optimizer == "nadam"): 
     parameters=nadam(train_x,Y,layers_dims,previous_updates,previous_updates,t,learning_rate=0.01,beta=0.9,num_epochs=10)
+if(gd_optimizer == "nesterov"):
+    parameters=nesterov(train_x,Y,learning_rate,beta,previous_updates,num_epochs)
+
