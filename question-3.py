@@ -306,6 +306,48 @@ def rmsprop(X,Y,layers_dims,learning_rate,beta,num_epochs):
         print("accuracy",z_acc)              
     return parameters, previous_updates
 
+def adam(X,Y,layers_dims,v,m,t,learning_rate,beta,num_epochs):
+    parameters = initialize_parameters_deep(layers_dims)
+    for j in range(0,num_epochs):
+            for i in range(0,iterations_bat):
+                start = i*batch_size
+                end = start+batch_size
+                AL, caches = L_model_forward(X[:,start:end], parameters)
+                grads = L_model_backward(Y[:,start:end],AL, caches)
+                
+                L = len(parameters) // 2 # number of layers in the neural network
+                beta1 = 0.9
+                beta2 = 0.999
+                epsilon = 1e-8
+            
+                for l in range(1, L+1):
+                    mdw = beta1*m["W"+str(l)] + (1-beta1)*grads["dW"+str(l)]
+                    vdw = beta2*v["W"+str(l)] + (1-beta2)*np.square(grads["dW"+str(l)])
+                    mw_hat = mdw/(1.0 - beta1**t)
+                    vw_hat = vdw/(1.0 - beta2**t)
+            
+                    parameters["W"+str(l)] = parameters["W"+str(l)] - (learning_rate * mw_hat)/np.sqrt(vw_hat + epsilon)
+            
+                    mdb = beta1*m["b"+str(l)] + (1-beta1)*grads["db"+str(l)]
+                    vdb = beta2*v["b"+str(l)] + (1-beta2)*np.square(grads["db"+str(l)])
+                    mb_hat = mdb/(1.0 - beta1**t)
+                    vb_hat = vdb/(1.0 - beta2**t)
+            
+                    parameters["b"+str(l)] = parameters["b"+str(l)] - (learning_rate * mb_hat)/np.sqrt(vb_hat + epsilon)
+            
+                    v["dW"+str(l)] = vdw
+                    m["dW"+str(l)] = mdw
+                    v["db"+str(l)] = vdb
+                    m["db"+str(l)] = mdb
+            
+                t = t + 1 # timestep                
+            z_pred_1, caches = L_model_forward(train_x, parameters)
+            z_pred = np.argmax(z_pred_1,axis = 0)
+            zyy = train_y.flatten()
+            z_acc = accuracy_score(zyy,z_pred)
+            print("accuracy",z_acc) 
+                #print("iteration" + str(j) + "done")
+    return parameters,v,m,t
 
 
 gd_optimizer = "momentum"
@@ -315,3 +357,8 @@ if(gd_optimizer == "momentum"):
     parameters, previous_updates=momentum(train_x,Y,layers_dims,learning_rate=0.01,beta=0.9,num_epochs=10)
 if(gd_optimizer == "rmsprop"):
     parameters, previous_updates=RMSprop(train_x,Y,layers_dims,learning_rate=0.01,beta=0.9,num_epochs=10)
+if(gd_optimizer == "Adam"):
+    t=1
+    v=previous_updates
+    m=previous_updates
+    parameters,v,m,t=adam(train_x,Y,layers_dims,previous_updates,previous_updates,t,learning_rate=0.01,beta=0.9,num_epochs=10)
