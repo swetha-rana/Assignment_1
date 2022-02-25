@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from numpy import exp
 from sklearn.metrics import accuracy_score
+class_names = ['T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat','Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle boot']
 
 (train_x_orig,train_y),(test_x_orig,test_y)= fashion_mnist.load_data()
 m_train = train_x_orig.shape[0]
