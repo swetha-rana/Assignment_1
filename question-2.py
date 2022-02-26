@@ -79,11 +79,12 @@ def relu(Z):
     A = np.maximum(0,Z)
     cache = Z 
     return A, cache
-def softmax(Z):
-    Z = cache
- 	A = exp(Z)
- 	A= A / A.sum()
-    return A,cache
+
+def sigmoid(Z):
+   
+    A = exp(Z)/exp(Z).sum()
+    cache = Z
+    return A, cache
  	
 
 #function: activation_forward
