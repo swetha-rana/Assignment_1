@@ -79,6 +79,12 @@ def relu(Z):
     A = np.maximum(0,Z)
     cache = Z 
     return A, cache
+def softmax(Z):
+    Z = cache
+ 	A = exp(Z)
+ 	A= A / A.sum()
+    return A,cache
+ 	
 
 #function: activation_forward
 #calls the feed forward and sigmoid or Relu activation functions
@@ -112,9 +118,12 @@ def L_model_forward(X, parameters):
           
     AL, cache = activation_forward(A, parameters['W' + str(L)], parameters['b' + str(L)], activation = "sigmoid")
     caches.append(cache)
+    AP=[]
+    for i in range(AL.shape[1]):
+         AA,cache = softmax(AL[:,i])
+         AP.append(AA) 
 
-    print(AL.shape)
-    return AL, caches
+    return AL, caches,AA
 
 #Function : L_layer_model
 #Will intialize parameters by calling initialize_parameters_
@@ -123,19 +132,8 @@ def L_model_forward(X, parameters):
 def L_layer_model(X, Y, layers_dims):
    
     parameters = initialize_parameters_(layers_dims)
-    AL, caches = L_model_forward(X, parameters)
-    return parameters,caches,AL
+    AL, caches,AA = L_model_forward(X, parameters)
+    return parameters,caches,AL,AA
 
-parameters,caches,AL = L_layer_model(train_x, Y, layers_dims)
-def softmax(n):
- 	e = exp(n)
- 	return e / e.sum()
- 	
+parameters,caches,AL,output_probability = L_layer_model(train_x, Y, layers_dims)
 
-
-sm=[]
-for i in range(AL.shape[1]):
-    n=AL[:,i]
-    u=softmax(n)
-    sm.append(u)
-probability=np.array(sm) 
