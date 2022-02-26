@@ -80,7 +80,7 @@ def relu(Z):
     cache = Z 
     return A, cache
 
-def sigmoid(Z):
+def softmax(Z):
    
     A = exp(Z)/exp(Z).sum()
     cache = Z
