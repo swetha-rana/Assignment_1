@@ -120,9 +120,11 @@ def relu_backward(dA, cache):
     
 
  
-def softmax(n):
- 	e = exp(n)
- 	return e / e.sum()
+def softmax(Z):
+    cache = Z
+ 	A = exp(Z)
+ 	A = A / A.sum()
+    return A,cache
  	
  	
  	
@@ -158,7 +160,10 @@ def L_model_forward(X, parameters):
         
     AL, cache = activation_forward(A, parameters['W' + str(L)], parameters['b' + str(L)], activation="sigmoid")
     caches.append(cache)
-            
+    AP=[]
+    for i in range(AL.shape[1]):
+         AA,cache = softmax(AL[:,i])
+         AP.append(AA)         
     return AL, caches
     
 #backpropagtion    
@@ -200,7 +205,7 @@ def L_model_backward(Y,AL, caches):
     dAL = - (np.divide(Y, AL) - np.divide(1 - Y, 1 - AL))
     
     current_cache = caches[L-1]
-    grads["dA" + str(L)], grads["dW" + str(L)], grads["db" + str(L)] = activation_backward(dAL, current_cache, activation="sigmoid")
+    grads["dA" + str(L)], grads["dW" + str(L)], grads["db" + str(L)] = activation_backward(dAL, current_cache, activation)
     
     for l in reversed(range(L-1)):
         current_cache = caches[l]
