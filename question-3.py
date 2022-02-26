@@ -121,10 +121,9 @@ def relu_backward(dA, cache):
 
  
 def softmax(Z):
-    cache = Z
  	A = exp(Z)
  	A = A / A.sum()
-    return A,cache
+    return A
  	
  	
  	
@@ -162,7 +161,7 @@ def L_model_forward(X, parameters):
     caches.append(cache)
     AP=[]
     for i in range(AL.shape[1]):
-         AA,cache = softmax(AL[:,i])
+         AA = softmax(AL[:,i])
          AP.append(AA)         
     return AL, caches
     
