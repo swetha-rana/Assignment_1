@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Thu Feb 23 19:31:55 2022
-
 @author: Swe-Rana
 """
 
@@ -12,6 +11,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from numpy import exp
 from sklearn.metrics import accuracy_score
+
+Hidden_layer_dimensions = [256,128,64]
+batch_size = 32
+
 
 (train_x_orig,train_y),(test_x_orig,test_y)= fashion_mnist.load_data()
 m_train = train_x_orig.shape[0]
@@ -25,9 +28,11 @@ no_of_class=10
 
 train_x = train_x_flatten/255.
 test_x = test_x_flatten/255.
-layers_dims = [len(train_x),256,128,no_of_class]
+#layers_dims = [len(train_x),256,128,no_of_class]
+num_features = train_x.shape[0]
+layers_dims = [num_features] + Hidden_layer_dimensions +[no_of_class]
 onehot_encoded = list()
-
+iterations_bat = int(train_x.shape[1]/batch_size)  
 for i in range(train_y.shape[1]):
     c=train_y[:,i][0]
     letter = [0 for _ in range(no_of_class)]
@@ -121,8 +126,8 @@ def relu_backward(dA, cache):
 
  
 def softmax(Z):
- 	A = exp(Z)
- 	A = A / A.sum()
+    A = exp(Z)
+    A = A / A.sum()
     return A
  	
  	
@@ -184,7 +189,7 @@ def activation_backward(dA, cache, activation):
         dA_prev, dW, db = linear_backward(dZ, linear_cache)
     
     if activation == "tanh":
-        dZ = tanh_backward(dA, activation_cache)
+        dZ = tanh_backward(dA)
         dA_prev, dW, db = linear_backward(dZ, linear_cache)
 
         
@@ -204,7 +209,7 @@ def L_model_backward(Y,AL, caches):
     dAL = - (np.divide(Y, AL) - np.divide(1 - Y, 1 - AL))
     
     current_cache = caches[L-1]
-    grads["dA" + str(L)], grads["dW" + str(L)], grads["db" + str(L)] = activation_backward(dAL, current_cache, activation)
+    grads["dA" + str(L)], grads["dW" + str(L)], grads["db" + str(L)] = activation_backward(dAL, current_cache, activation="sigmoid")
     
     for l in reversed(range(L-1)):
         current_cache = caches[l]
@@ -225,8 +230,7 @@ def update_parameters(parameters, grads, learning_rate,lamda):
     return parameters
     
 #stochastic gradient    
-batch_size = 100
-iterations_bat = int(train_x.shape[1]/batch_size)   
+ 
 def stochastic_gradient(X, Y, layers_dims, learning_rate,num_epochs,lamda):
           parameters = initialize_parameters(layers_dims)
           for j in range(0,num_epochs):
@@ -282,7 +286,7 @@ def rmsprop(X,Y,layers_dims,learning_rate,beta,num_epochs):
            end = start+batch_size
            AL, caches = L_model_forward(X[:,start:end], parameters)
 
-           grads = L_model_backward(AL, Y[:,start:end], caches)
+           grads = L_model_backward(Y[:,start:end],AL, caches)
 
            delta = 1e-6 
             
@@ -424,15 +428,15 @@ def nesterov(X,Y,learning_rate,beta,previous_updates,num_epochs):
         zyy = train_y.flatten()
         z_acc = accuracy_score(zyy,z_pred)
         print("accuracy_nestrov",z_acc) 
-    return params            
+    return parameters            
 
 t = 1
 learning_rate = 0.01
 beta = 0.9
-num_epochs=10
+num_epochs=3
 lamda = 0.0005
 
-gd_optimizer = "stochastic_gradient"
+gd_optimizer = "rmsprop"
 if(gd_optimizer == "stochastic_gradient"):
     parameters =stochastic_gradient(train_x, Y, layers_dims, learning_rate,num_epochs,lamda)
 if(gd_optimizer == "momentum"):
@@ -446,3 +450,9 @@ if(gd_optimizer == "Nadam"):
     parameters=Nadam(train_x,Y,layers_dims,previous_updates,previous_updates,t,learning_rate,beta,num_epochs)
 if(gd_optimizer == "nesterov"):
     parameters=nesterov(train_x,Y,learning_rate,beta,previous_updates,num_epochs)
+
+z_pred_1, caches = L_model_forward(test_x, parameters)
+z_pred = np.argmax(z_pred_1,axis = 0)
+zyy = test_y.flatten()
+z_acc = accuracy_score(zyy,z_pred)
+print("accuracy for test",z_acc) 
