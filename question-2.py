@@ -6,10 +6,12 @@ Created on Tue Feb 20 22:06:21 2022
 @author: tenet
 """
 
-
 from tensorflow.keras.datasets import fashion_mnist
 import numpy as np
 from numpy import exp
+
+
+Hidden_layer_dimensions = [256,128,64]
 
 (train_x_orig,train_y),(test_x_orig,test_y)= fashion_mnist.load_data()
 m_train = train_x_orig.shape[0]
@@ -23,7 +25,7 @@ no_of_class=len(np.unique(train_y))
 
 train_x = train_x_flatten/255
 test_x = test_x_flatten/255
-layers_dims = [len(train_x),256,128,no_of_class]
+#layers_dims = [len(train_x),256,128,no_of_class]
 onehot_encoded = list()
 
 for i in range(train_y.shape[1]):
@@ -34,7 +36,8 @@ for i in range(train_y.shape[1]):
 
 Y=np.array(onehot_encoded)
 num_features = train_x.shape[0]
-layers_dims = [num_features,256,128,no_of_class]
+layers_dims = [num_features] + Hidden_layer_dimensions +[no_of_class]
+#layers_dims = [num_features,256,128,no_of_class]
 
 # Function: initialize_parameters_ 
 # used for initialising the parameters of feed forward network
@@ -124,7 +127,7 @@ def L_model_forward(X, parameters):
          AA,cache = softmax(AL[:,i])
          AP.append(AA) 
 
-    return AL, caches,AA
+    return AL, caches,AP
 
 #Function : L_layer_model
 #Will intialize parameters by calling initialize_parameters_
@@ -136,5 +139,5 @@ def L_layer_model(X, Y, layers_dims):
     AL, caches,AA = L_model_forward(X, parameters)
     return parameters,caches,AL,AA
 
-parameters,caches,AL,output_probability = L_layer_model(train_x, Y, layers_dims)
-
+parameters,caches,AL,output_probability = L_layer_model(test_x, test_y, layers_dims)
+print(output_probability[0])
