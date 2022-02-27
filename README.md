@@ -42,7 +42,7 @@ Then you have to call your optimizer function.
 We have developed All the optimizers in similar manner and tested. This program outputs the accuracy for each epoch. And at the end outputs the accuracy of the model on test set.
 
  **Question4.ipynb** This program contains wandb sweeps and resposible for generating the sweeps.      
-
+Question7.py This program used to compute confusion matrix for our predicted and actual values of train and test parameter
             
   
 
